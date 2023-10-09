@@ -1,6 +1,6 @@
-# deploy-apprunner-by-terraform-and-ecr の概要
+# 概要
 
-## 以下のgit リポジトリの環境をデプロイするためのterraform
+## 以下のgit リポジトリの環境をデプロイするためのterraform環境を構築
 https://github.com/yusa0730/nextjs-docker
 
 ## 構築手順
