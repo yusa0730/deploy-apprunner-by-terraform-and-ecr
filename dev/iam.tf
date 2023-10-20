@@ -70,3 +70,81 @@ resource "aws_iam_role_policy_attachment" "secrets_and_parameters_access_policy_
   policy_arn = aws_iam_policy.secrets_and_parameters_access.arn
   role       = aws_iam_role.apprunner_instance.name
 }
+
+resource "aws_iam_policy" "rds_full_access" {
+  name        = "RDSFullAccess"
+  description = "Full access to RDS"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "rds:*",
+        Resource = "*",
+        Effect   = "Allow"
+      },
+      {
+        Action = "rds-db:*",
+        Effect = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "rds_full_access_policy_attach" {
+  policy_arn = aws_iam_policy.rds_full_access.arn
+  role       = aws_iam_role.apprunner_instance.name
+}
+
+resource "aws_iam_role" "ec2" {
+  name = "EC2Role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2" {
+  name = "EC2InstanceProfile"
+  role = aws_iam_role.ec2.name
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_session_manager_ssm" {
+  role = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_policy" "aurora_full_access" {
+  name = "AuroraIAMAuthentication"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "rds:*",
+        Effect = "Allow",
+        Resource = "*"
+      },
+      {
+        Action = "rds-db:*",
+        Effect = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_aurora_attach" {
+  role = aws_iam_role.ec2.name
+  policy_arn = aws_iam_policy.aurora_full_access.arn
+}
