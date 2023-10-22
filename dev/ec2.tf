@@ -3,10 +3,10 @@ data "aws_ssm_parameter" "amzn2_ami" {
 }
 
 resource "aws_instance" "bastion" {
-  ami = data.aws_ssm_parameter.amzn2_ami.value
-  instance_type = "t2.micro"
+  ami                  = data.aws_ssm_parameter.amzn2_ami.value
+  instance_type        = "t2.micro"
   iam_instance_profile = aws_iam_instance_profile.ec2.name
-  subnet_id = aws_subnet.ec2_public_a.id
+  subnet_id            = aws_subnet.ec2_public_a.id
   vpc_security_group_ids = [
     aws_security_group.ec2_sg.id
   ]
@@ -20,6 +20,8 @@ resource "aws_instance" "bastion" {
     EOF
 
   tags = {
-    Name = "${var.env}-bastion-ec2"
+    Name      = "${var.project_name}-${var.env}-bastion-ec2",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }

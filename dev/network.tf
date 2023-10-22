@@ -4,7 +4,9 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.env}-vpc"
+    Name      = "${var.project_name}-${var.env}-vpc",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -15,7 +17,9 @@ resource "aws_subnet" "interface_private_a" {
   availability_zone = "${var.region}a"
 
   tags = {
-    Name = "${var.env}-interface-private-a-sbn"
+    Name      = "${var.project_name}-${var.env}-interface-private-a-sbn",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -25,7 +29,9 @@ resource "aws_subnet" "interface_private_c" {
   availability_zone = "${var.region}c"
 
   tags = {
-    Name = "${var.env}-interface-private-c-sbn"
+    Name      = "${var.project_name}-${var.env}-interface-private-c-sbn",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -36,7 +42,9 @@ resource "aws_subnet" "aurola_private_a" {
   availability_zone = "${var.region}a"
 
   tags = {
-    Name = "${var.env}-aurola-private-a-sbn"
+    Name      = "${var.project_name}-${var.env}-aurola-private-a-sbn",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -46,18 +54,22 @@ resource "aws_subnet" "aurola_private_c" {
   availability_zone = "${var.region}c"
 
   tags = {
-    Name = "${var.env}-aurola-private-c-sbn"
+    Name      = "${var.project_name}-${var.env}-aurola-private-c-sbn",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
 resource "aws_subnet" "ec2_public_a" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.2.10.0/24"
-  availability_zone = "${var.region}a"
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.2.10.0/24"
+  availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.env}-ec2-public-a-sbn"
+    Name      = "${var.project_name}-${var.env}-ec2-public-a-sbn",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -66,7 +78,9 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.env}-internet-gateway"
+    Name      = "${var.project_name}-${var.env}-internet-gateway",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -79,7 +93,9 @@ resource "aws_route_table" "public_a" {
     gateway_id = aws_internet_gateway.main.id
   }
   tags = {
-    Name = "${var.env}-public-a-route-table"
+    Name      = "${var.project_name}-${var.env}-public-a-route-table",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -112,8 +128,11 @@ resource "aws_route_table" "private_a" {
   #   cidr_block     = "0.0.0.0/0"
   #   nat_gateway_id = aws_nat_gateway.nat_1a.id
   # }
+
   tags = {
-    Name = "${var.env}-private-a-route-table"
+    Name      = "${var.project_name}-${var.env}-private-a-route-table",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -125,7 +144,9 @@ resource "aws_route_table" "private_c" {
   #   nat_gateway_id = aws_nat_gateway.nat_1c.id
   # }
   tags = {
-    Name = "${var.env}-private-c-route-table"
+    Name      = "${var.project_name}-${var.env}-private-c-route-table",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -151,8 +172,8 @@ resource "aws_route_table_association" "aurola_private_1c" {
 
 # security_group
 resource "aws_security_group" "interface_sg" {
-  name        = "${var.env}-interface-sg"
-  description = "${var.env}-interface-sg"
+  name        = "${var.project_name}-${var.env}-interface-sg"
+  description = "${var.project_name}-${var.env}-interface-sg"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -170,11 +191,17 @@ resource "aws_security_group" "interface_sg" {
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-interface-sg",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_security_group" "ec2_sg" {
-  name        = "${var.env}-ec2-sg"
-  description = "${var.env}-ec2-sg"
+  name        = "${var.project_name}-${var.env}-ec2-sg"
+  description = "${var.project_name}-${var.env}-ec2-sg"
   vpc_id      = aws_vpc.main.id
 
   egress {
@@ -184,11 +211,17 @@ resource "aws_security_group" "ec2_sg" {
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-ec2-sg",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_security_group" "aurora_sg" {
-  name        = "${var.env}-aurora-sg"
-  description = "${var.env}-aurora-sg"
+  name        = "${var.project_name}-${var.env}-aurora-sg"
+  description = "${var.project_name}-${var.env}-aurora-sg"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -196,7 +229,24 @@ resource "aws_security_group" "aurora_sg" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
+    security_groups = [
+      aws_security_group.ec2_sg.id,
+      aws_security_group.interface_sg.id
+    ]
+  }
+
+  egress {
+    description = ""
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-aurora-sg",
+    Env       = var.env,
+    ManagedBy = "Terraform"
   }
 }
 
@@ -205,8 +255,8 @@ resource "aws_vpc_endpoint" "apprunner" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-northeast-1.apprunner.requests"
   vpc_endpoint_type = "Interface"
-  
-  subnet_ids        = [
+
+  subnet_ids = [
     aws_subnet.interface_private_a.id,
     aws_subnet.interface_private_c.id,
   ]
@@ -216,4 +266,10 @@ resource "aws_vpc_endpoint" "apprunner" {
   ]
 
   private_dns_enabled = false
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-apprunner-vpc-endpoint",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }

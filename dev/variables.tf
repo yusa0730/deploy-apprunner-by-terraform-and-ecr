@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "The name of the project."
   type        = string
-  default     = "20231008-test"
+  default     = "leadinfla"
 }
 
 variable "env" {

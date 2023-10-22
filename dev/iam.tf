@@ -1,5 +1,5 @@
 resource "aws_iam_role" "apprunner_ecr_access" {
-  name = "apprunner-ecr-access-role"
+  name = "${var.project_name}-${var.env}-apprunner-ecr-access-iam-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -13,6 +13,12 @@ resource "aws_iam_role" "apprunner_ecr_access" {
       }
     ]
   })
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-apprunner-ecr-access-iam-role",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "apprunner_ecr_policy_attach" {
@@ -45,10 +51,16 @@ resource "aws_iam_role" "apprunner_instance" {
       }
     ]
   })
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-apprunner-instance-iam-role",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_policy" "secrets_and_parameters_access" {
-  name        = "AppRunnerSecretsAndParametersAccess"
+  name        = "${var.project_name}-${var.env}-apprunner-secrets-and-parameters-access-policy"
   description = "Allow App Runner to access Secrets Manager and Parameter Store"
 
   policy = jsonencode({
@@ -57,13 +69,22 @@ resource "aws_iam_policy" "secrets_and_parameters_access" {
       {
         Action = [
           "secretsmanager:GetSecretValue",
-          "ssm:GetParameter"
+          "secretsmanager:PutSecretValue",
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:PutParameter"
         ],
         Effect   = "Allow",
         Resource = "*"
       }
     ]
   })
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-apprunner-secrets-and-parameters-access-policy",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "secrets_and_parameters_access_policy_attach" {
@@ -72,7 +93,7 @@ resource "aws_iam_role_policy_attachment" "secrets_and_parameters_access_policy_
 }
 
 resource "aws_iam_policy" "rds_full_access" {
-  name        = "RDSFullAccess"
+  name        = "${var.project_name}-${var.env}-rds-full-access-policy"
   description = "Full access to RDS"
 
   policy = jsonencode({
@@ -84,12 +105,18 @@ resource "aws_iam_policy" "rds_full_access" {
         Effect   = "Allow"
       },
       {
-        Action = "rds-db:*",
-        Effect = "Allow",
+        Action   = "rds-db:*",
+        Effect   = "Allow",
         Resource = "*"
       }
     ]
   })
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-rds-full-access-policy",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "rds_full_access_policy_attach" {
@@ -98,7 +125,7 @@ resource "aws_iam_role_policy_attachment" "rds_full_access_policy_attach" {
 }
 
 resource "aws_iam_role" "ec2" {
-  name = "EC2Role"
+  name = "${var.project_name}-${var.env}-ec2-iam-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -112,39 +139,26 @@ resource "aws_iam_role" "ec2" {
       }
     ]
   })
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-ec2-iam-role",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_instance_profile" "ec2" {
-  name = "EC2InstanceProfile"
+  name = "${var.project_name}-${var.env}-iam-instance-profile"
   role = aws_iam_role.ec2.name
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-iam-instance-profile",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_session_manager_ssm" {
-  role = aws_iam_role.ec2.name
+  role       = aws_iam_role.ec2.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_policy" "aurora_full_access" {
-  name = "AuroraIAMAuthentication"
-  
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "rds:*",
-        Effect = "Allow",
-        Resource = "*"
-      },
-      {
-        Action = "rds-db:*",
-        Effect = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_aurora_attach" {
-  role = aws_iam_role.ec2.name
-  policy_arn = aws_iam_policy.aurora_full_access.arn
 }
