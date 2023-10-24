@@ -60,7 +60,7 @@ resource "aws_batch_job_definition" "main" {
         value = "2048"
       }
     ]
-    jobRoleArn = "${aws_iam_role.public_batch_job_role.arn}"
+    jobRoleArn = "${aws_iam_role.batch_job_role.arn}"
 
     executionRoleArn = "${aws_iam_role.batch_task_execution_role.arn}"
   })

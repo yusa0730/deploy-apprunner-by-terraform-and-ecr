@@ -226,8 +226,8 @@ resource "aws_iam_role_policy_attachment" "batch_task_execution" {
   policy_arn = data.aws_iam_policy.batch_task_execution.arn
 }
 
-resource "aws_iam_role" "public_batch_job_role" {
-  name = "${var.env}-public-batch-job-role"
+resource "aws_iam_role" "batch_job_role" {
+  name = "${var.project_name}-${var.env}-batch-job-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -242,30 +242,19 @@ resource "aws_iam_role" "public_batch_job_role" {
   })
 
   tags = {
-    Name      = "${var.project_name}-${var.env}-batch-task-execution-role",
+    Name      = "${var.project_name}-${var.env}-batch-job-role",
     Env       = var.env,
     ManagedBy = "Terraform"
   }
 }
 
-resource "aws_iam_role_policy" "public_batch_job" {
-  name   = "${var.project_name}-${var.env}-public-batch-job-policy"
-  role   = aws_iam_role.public_batch_job_role.id
-  policy = data.aws_iam_policy_document.public_batch_job_custom.json
+resource "aws_iam_role_policy" "batch_job" {
+  name   = "${var.project_name}-${var.env}-batch-job-policy"
+  role   = aws_iam_role.batch_job_role.id
+  policy = data.aws_iam_policy_document.batch_job_custom.json
 }
 
-data "aws_iam_policy_document" "public_batch_job_custom" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ssmmessages:CreateControlChannel",
-      "ssmmessages:CreateDataChannel",
-      "ssmmessages:OpenControlChannel",
-      "ssmmessages:OpenDataChannel",
-    ]
-    resources = ["*"]
-  }
-
+data "aws_iam_policy_document" "batch_job_custom" {
   statement {
     effect = "Allow"
     actions = [
@@ -293,7 +282,7 @@ data "aws_iam_policy_document" "public_batch_job_custom" {
 
 # IAM Role that EventBridge assumes
 resource "aws_iam_role" "event_role" {
-  name = "${var.env}-event-bridge-batch-execution-role"
+  name = "${var.project_name}-${var.env}-event-bridge-batch-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",

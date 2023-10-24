@@ -4,7 +4,7 @@ resource "aws_cloudwatch_event_rule" "main" {
   description = "${var.project_name}-${var.env}-event-rule"
 
   # schedule_expression = "cron(30 12 ? * 6#1 *)"
-  schedule_expression = "cron(0/10 * * * ? *)"
+  schedule_expression = "cron(0/5 * * * ? *)"
 
   tags = {
     Name      = "${var.project_name}-${var.env}-event-rule"
