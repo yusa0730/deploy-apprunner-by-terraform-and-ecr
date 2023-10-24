@@ -27,3 +27,18 @@ resource "aws_ecr_repository" "backend" {
     ManagedBy = "Terraform"
   }
 }
+
+resource "aws_ecr_repository" "aws_batch" {
+  name                 = "${var.project_name}-${var.env}-aws-batch-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name      = "${var.project_name}-${var.env}-aws-batch-ecr",
+    Env       = var.env,
+    ManagedBy = "Terraform"
+  }
+}
